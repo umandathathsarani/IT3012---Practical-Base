@@ -35,6 +35,15 @@ class VisualGridHuntGame:
             if tuple(op_pos) != (0, 0) and tuple(op_pos) not in self.walls and tuple(op_pos) not in self.food_positions:
                 self.opponents.append(op_pos)
 
+        # Generate toxic traps
+        self.toxic_traps = set()
+        while len(self.toxic_traps) < 5:
+            tx = random.randint(0, self.width - 1)
+            ty = random.randint(0, self.height - 1)
+            pos_tuple = (tx, ty)
+            if pos_tuple != (0, 0) and pos_tuple not in self.walls and pos_tuple not in self.food_positions:
+                self.toxic_traps.add(pos_tuple)
+
         self.score = 0
         self.steps = 0
         self.collision = False
@@ -45,6 +54,7 @@ class VisualGridHuntGame:
             'opponent_positions': [list(op) for op in self.opponents],
             'smells_food': tuple(self.agent_pos) in self.food_positions,
             'hit_wall': tuple(self.agent_pos) in self.walls,
+            'smells_toxin': tuple(self.agent_pos) in self.toxic_traps,
             'collision': self.collision,
             'score': self.score,
             'remaining_food': len(self.food_positions)
@@ -72,6 +82,9 @@ class VisualGridHuntGame:
         if tuple_pos in self.food_positions:
             self.food_positions.remove(tuple_pos)
             self.score += 20
+            
+        if tuple_pos in self.toxic_traps:
+            self.score -= 15
 
         for op in self.opponents:
             move = random.choice(['Up', 'Down', 'Left', 'Right', 'Stay'])
@@ -145,6 +158,17 @@ class GridGameGUI:
             y1 = (self.env.height - 1 - fy) * self.cell_size + offset
             self.canvas.create_oval(x1, y1, x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5, fill="#f59e0b",
                                     outline="#d97706")
+
+        for tx, ty in self.env.toxic_traps:
+            offset = self.cell_size * 0.25
+            x1 = tx * self.cell_size + offset
+            y1 = (self.env.height - 1 - ty) * self.cell_size + offset
+            self.canvas.create_polygon(
+                x1 + self.cell_size * 0.25, y1,
+                x1 + self.cell_size * 0.5, y1 + self.cell_size * 0.5,
+                x1, y1 + self.cell_size * 0.5,
+                fill="purple", outline="purple"
+            )
 
         for ox, oy in self.env.opponents:
             offset = self.cell_size * 0.2
