@@ -1,11 +1,11 @@
-# IT3012 - Intelligent Agents - Lab Practical 01
+# IT3012 - Intelligent Agents - Lab Practical 02
 
 ## Overview
-This branch contains the completed tasks for **Practical 01: Environment Architecture & Theoretical Evaluation**.
-The modifications map back to the theoretical nature of intelligent agents, focusing on the PEAS framework (Performance, Environment, Actuators, Sensors).
+This branch contains the completed tasks for **Practical 02: Agent Architectures**.
+The modifications implement a Simple Reflex Agent and a Model-Based Agent in a partially observable environment.
 
 ## Modifications Made
-- **Environment State**: Initialized toxic traps safely avoiding the agent's start position, food, and walls.
-- **Perception Subsystem**: Added a `smells_toxin` sensor to alert the agent when it's positioned on a toxic trap.
-- **Action Execution**: Programmed a penalty score of 15 points if the agent steps on a toxic trap to prevent metric exploitation.
-- **Visual Rendering**: Updated the `visual_grid_game.py` to render the newly created toxic traps as purple shapes on the graphical canvas.
+- **Partial Observability**: Modified `get_percept` in `visual_grid_game.py` so the agent only receives local boolean flags (`wall_ahead`, `wall_left`, `wall_right`, `food_here`) based on its current facing direction, rather than global coordinates.
+- **Simple Reflex Agent**: Created `SimpleReflexAgent` using strict condition-action rules (`IF food_here THEN suck; IF wall_ahead THEN turn_left; ELSE move_forward`). This agent struggles and falls into infinite loops in complex map structures due to a lack of memory.
+- **Model-Based Agent**: Created `ModelBasedAgent` which tracks its relative movement and history (`visited_cells`) to avoid getting trapped in loops. It updates its internal state before deciding on its next action.
+- **Agent Direction**: Modified the core game environment to track and visually display the agent's facing direction.
