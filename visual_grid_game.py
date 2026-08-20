@@ -72,6 +72,10 @@ class VisualGridHuntGame:
             return p in self.walls or p[0] < 0 or p[0] >= self.width or p[1] < 0 or p[1] >= self.height
             
         return {
+            'agent_pos': tuple(self.agent_pos),
+            'grid_size': (self.width, self.height),
+            'walls': list(self.walls),
+            'all_food': list(self.food_positions),
             'wall_ahead': is_wall(pos_ahead),
             'wall_left': is_wall(pos_left),
             'wall_right': is_wall(pos_right),
@@ -263,7 +267,7 @@ class GridGameGUI:
 
 
 if __name__ == "__main__":
-    from agent import SimpleReflexAgent, ModelBasedAgent
+    from agent import SimpleReflexAgent, ModelBasedAgent, SearchAgent
     root = tk.Tk()
     
     # Try a larger grid size like 12x12 with 15 food and 3 opponents!
@@ -271,7 +275,10 @@ if __name__ == "__main__":
     # agent = SimpleReflexAgent()
     
     # To test ModelBasedAgent, uncomment below:
-    agent = ModelBasedAgent()
+    # agent = ModelBasedAgent()
+    
+    # To test SearchAgent, uncomment below:
+    agent = SearchAgent()
     
     app = GridGameGUI(root, agent=agent, width=12, height=12, num_food=15, num_opponents=0)
     root.mainloop()
