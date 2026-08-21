@@ -1,6 +1,7 @@
 import random
 from collections import deque
 import heapq
+import math
 
 class GreedyGridAgent:
     """A simple agent that tries to move around systematically to clear the grid."""
@@ -125,6 +126,8 @@ class SearchAgent:
                 self.plan = self.dfs_search(agent_pos, goal, percept)
             elif self.active_algo == 'UCS':
                 self.plan = self.ucs_search(agent_pos, goal, percept)
+            elif self.active_algo == 'AStar':
+                self.plan = self.astar_search(agent_pos, goal, percept['walls'], percept['grid_size'])
                 
             if not self.plan:
                 # If no path is found, just stay or move randomly
@@ -177,6 +180,64 @@ class SearchAgent:
                 for action, next_state in self.get_successors(state, percept):
                     if next_state not in reached:
                         frontier.append((next_state, path + [action]))
+        return []
+
+    def manhattan_distance(self, pos, goal):
+        return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+        
+    def euclidean_distance(self, pos, goal):
+        return math.sqrt((pos[0] - goal[0])**2 + (pos[1] - goal[1])**2)
+        
+    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic_type='manhattan'):
+        frontier = []
+        reached_states = set()
+        
+        # Initial g(n) = 0
+        g_cost = 0
+        
+        if heuristic_type == 'manhattan':
+            h_cost = self.manhattan_distance(start_pos, goal_pos)
+        else:
+            h_cost = self.euclidean_distance(start_pos, goal_pos)
+            
+        f_cost = g_cost + h_cost
+        
+        # Tuple format: (f_cost, g_cost, current_pos, path_taken)
+        heapq.heappush(frontier, (f_cost, g_cost, start_pos, []))
+        
+        # Helper to get successors specifically for AStar since signature differs from get_successors
+        def get_valid_neighbors(pos):
+            x, y = pos
+            width, height = grid_size
+            walls_set = set(walls)
+            moves = [('Up', (x, y + 1)), ('Right', (x + 1, y)), ('Down', (x, y - 1)), ('Left', (x - 1, y))]
+            valid = []
+            for action, (nx, ny) in moves:
+                if 0 <= nx < width and 0 <= ny < height and (nx, ny) not in walls_set:
+                    valid.append((action, (nx, ny)))
+            return valid
+
+        while frontier:
+            f, g, current_pos, path_taken = heapq.heappop(frontier)
+            
+            if current_pos == goal_pos:
+                return path_taken
+                
+            if current_pos in reached_states:
+                continue
+                
+            reached_states.add(current_pos)
+            
+            for action, neighbor in get_valid_neighbors(current_pos):
+                if neighbor not in reached_states:
+                    g_new = g + 1
+                    if heuristic_type == 'manhattan':
+                        h_new = self.manhattan_distance(neighbor, goal_pos)
+                    else:
+                        h_new = self.euclidean_distance(neighbor, goal_pos)
+                    f_new = g_new + h_new
+                    heapq.heappush(frontier, (f_new, g_new, neighbor, path_taken + [action]))
+                    
         return []
 
     def ucs_search(self, start, goal, percept):
