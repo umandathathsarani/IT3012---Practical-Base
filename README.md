@@ -11,6 +11,7 @@ This repository contains the ongoing coursework and practical implementations fo
 - **`Lab_02`**: Contains the completed modifications for Practical 02 (Agent Architectures), including the implementation of a Simple Reflex Agent and a Model-Based Agent in a partially observable environment.
 - **`Lab_03`**: Contains the completed tasks for Practical 03 (Uninformed Search), introducing a Goal-Based/Planning Agent using Breadth-First Search (BFS), Depth-First Search (DFS), and Uniform-Cost Search (UCS).
 - **`Lab_04`**: Contains the completed tasks for Practical 04 (Informed Search), enhancing the Planning Agent with A* Search and Heuristic Functions (Manhattan and Euclidean distances).
-- *(Future lab sessions will have their own dedicated branches such as `Lab_05`, `Lab_06`, etc.)*
+- **`Lab_05`**: Contains the completed tasks for Practical 05 (Knowledge Base & Logic Engine), introducing a declarative `KnowledgeBase` and `forward_chain` inference engine to ensure tile feasibility during A* pathfinding.
+- *(Future lab sessions will have their own dedicated branches such as `Lab_06`, etc.)*
 
 Please switch to the respective branch to view the code and documentation for that specific lab practical!
