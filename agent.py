@@ -2,6 +2,7 @@ import random
 from collections import deque
 import heapq
 import math
+from logic_engine import KnowledgeBase
 
 class GreedyGridAgent:
     """A simple agent that tries to move around systematically to clear the grid."""
@@ -102,7 +103,10 @@ class SearchAgent:
     
     def __init__(self):
         self.plan = []
-        self.active_algo = 'BFS'  # Switch between 'BFS', 'DFS', 'UCS'
+        self.active_algo = 'BFS'  # Switch between 'BFS', 'DFS', 'UCS', 'AStar'
+        self.kb = KnowledgeBase()
+        self.kb.tell_rule(['TargetVisible', 'HasDust'], 'SafeToEngage')
+        self.kb.tell_rule(['SafeToEngage', 'BloodseekerMissing'], 'Retreat')
         
     def sense_and_act(self, percept: dict) -> str:
         # If we reached food, suck it
@@ -127,7 +131,7 @@ class SearchAgent:
             elif self.active_algo == 'UCS':
                 self.plan = self.ucs_search(agent_pos, goal, percept)
             elif self.active_algo == 'AStar':
-                self.plan = self.astar_search(agent_pos, goal, percept['walls'], percept['grid_size'])
+                self.plan = self.astar_search(agent_pos, goal, percept['walls'], percept['grid_size'], percept=percept)
                 
             if not self.plan:
                 # If no path is found, just stay or move randomly
@@ -188,7 +192,7 @@ class SearchAgent:
     def euclidean_distance(self, pos, goal):
         return math.sqrt((pos[0] - goal[0])**2 + (pos[1] - goal[1])**2)
         
-    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic_type='manhattan'):
+    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic_type='manhattan', percept=None):
         frontier = []
         reached_states = set()
         
@@ -229,6 +233,16 @@ class SearchAgent:
             reached_states.add(current_pos)
             
             for action, neighbor in get_valid_neighbors(current_pos):
+                # Consult KB for feasibility
+                self.kb.clear_facts()
+                if percept:
+                    for fact in percept.get('logic_facts', []):
+                        self.kb.tell_fact(fact)
+                self.kb.forward_chain()
+                
+                if 'Retreat' in self.kb.facts:
+                    continue  # Mark tile as infeasible
+                    
                 if neighbor not in reached_states:
                     g_new = g + 1
                     if heuristic_type == 'manhattan':
